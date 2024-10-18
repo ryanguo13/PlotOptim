@@ -33,51 +33,37 @@ data = df
 #     Intensity = vcat(ones(25), 50 .* ones(5), ones(70)) + 0.1 * randn(100)
 # )
 
-# Task 1: 判断突变的区域
-threshold = 50.0  # 定义用于检测突变的阈值
-intensity_diff = abs.(diff(data.Intensity))
-mutation_indices = findall(x -> x > threshold, intensity_diff)
+# Task 1: 判断突变（突然变大）的区域
+# 使用滑动窗口方法来检测突变
+window_size = 20
+threshold = 20
 
-# 确保只找起始和结束位置
-mutation_start = Int[]
-mutation_end = Int[]
+# 创建一个布尔数组来标记突变点
+mutations = Bool.(abs.(diff(data.Intensity)) .> threshold * std(data.Intensity))
 
-for idx in mutation_indices
-    if isempty(mutation_start) || idx > mutation_end[end] + 1
-        push!(mutation_start, idx + 1)
-        push!(mutation_end, idx + 1)
-    else
-        mutation_end[end] = idx + 1
-    end
-end
+# 创建一个布尔数组来标记突变点
+connected_mutations = Bool.(diff(mutations) .!= 0)
 
-println("突变区域开始索引: $mutation_start")
-println("突变区域结束索引: $mutation_end")
+# 创建一个布尔数组来标记突变点
+connected_mutations = vcat(false, connected_mutations)
 
-# Task 2: 过滤掉突变的区域, 并保留合适的索引
-global keep_indices
-keep_indices = collect(1:nrow(data))
+# 创建一个布尔数组来标记突变点
+connected_mutations = connected_mutations[1:end-1]
 
-for (start, stop) in zip(mutation_start, mutation_end)
-    keep_indices = setdiff(keep_indices, start:stop)
-end
+# 打印突变点
+println("Mutations: ", mutations)
+println("Connected Mutations: ", connected_mutations)
 
-filtered_data = data[keep_indices, :]
+# Task 2: 过滤掉突变点
+filtered_data = data[.!connected_mutations, :]
 
-# Task 3: 连接突变的区域头尾
-new_intensity = copy(filtered_data.Intensity)
-for i in eachindex(mutation_start)
-    if mutation_start[i] > 1 && mutation_end[i] < nrow(data)
-        before_index = findfirst(==(mutation_start[i]-1), keep_indices)
-        after_index = findfirst(==(mutation_end[i]+1), keep_indices)
-        if !isnothing(before_index) && !isnothing(after_index)
-            average_value = (data.Intensity[mutation_start[i]-1] + data.Intensity[mutation_end[i]+1]) / 2
-            insert!(new_intensity, before_index + 1, average_value)
-        end
-    end
-end
+# Task 3: 连接突变点
+connected_data = data[connected_mutations, :]
 
-filtered_data[:, :Intensity] .= new_intensity
+
+
+
+
 
 # 绘制原始数据和过滤后的数据进行对比
 plot(data.SputterTime, data.Intensity, label="Original", xlabel="Sputter Time (s)", ylabel="Intensity", lw=2)

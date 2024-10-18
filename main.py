@@ -33,6 +33,13 @@ for idx in spike_indices:
     end_idx = min(len(time) - 1, idx + 2)
     spike_intervals.append((start_idx, end_idx))
 
+# 创建新的时间和强度列表，用于存储去除突变区间后的数据
+filtered_time = []
+filtered_intensity = []
+
+
+
+
 # 创建 Plotly 图形对象
 fig = go.Figure()
 
