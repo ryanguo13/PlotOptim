@@ -27,22 +27,22 @@ threshold = np.percentile(np.abs(diff_intensity), 99)  # 设置 99% 百分位数
 spike_indices = np.where(np.abs(diff_intensity) > threshold)[0]
 
 # 确定突变的区间
-skipe_intervals = []
+skip_intervals = []
 for idx in spike_indices:
     start_idx = max(0, idx - 1)
     end_idx = min(len(time) - 1, idx + 5) # 根据需要调整区间长度
-    if skipe_intervals and skipe_intervals[-1][1] >= start_idx:
-        skipe_intervals[-1] = (skipe_intervals[-1][0], end_idx)
+    if skip_intervals and skip_intervals[-1][1] >= start_idx:
+        skip_intervals[-1] = (skip_intervals[-1][0], end_idx)
     else:
-        skipe_intervals.append((start_idx, end_idx))
+        skip_intervals.append((start_idx, end_idx))
 
-skip_indices = [i for interval in skipe_intervals for i in range(interval[0], interval[1])]
+skip_indices = [i for interval in skip_intervals for i in range(interval[0], interval[1])]
 
 
 slices = []
 last_index = 0
 
-for start, end in skipe_intervals:
+for start, end in skip_intervals:
     slices.append(df.iloc[last_index:start])
     last_index = end
 
@@ -74,7 +74,7 @@ fig.add_trace(go.Scatter(x=mapped_data['Sputter_Time__s_'], y=mapped_data['Inten
 fig.add_trace(go.Scatter(x=df['Sputter_Time__s_'], y=intensity, mode='lines+markers', name='Intensity', line=dict(color='green'), marker=dict(size=0.5)))
 
 # 标记突变区间
-for (start, end) in skipe_intervals:
+for (start, end) in skip_intervals:
     # 标记区间
     fig.add_vrect(x0=start, x1=end, fillcolor='red', opacity=0.3, line_width=0)
 
@@ -91,5 +91,5 @@ fig.show()
 
 # 输出突变的区间
 print("Detected spike intervals:")
-for (start, end) in skipe_intervals:
+for (start, end) in skip_intervals:
     print(f"Start: {time[start]}, End: {time[end]}")
