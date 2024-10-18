@@ -73,14 +73,10 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(x=mapped_data['Sputter_Time__s_'], y=mapped_data['Intensity'], mode='lines+markers', name='Intensity mapped', line=dict(color='blue'), marker=dict(size=0.5)))
 fig.add_trace(go.Scatter(x=df['Sputter_Time__s_'], y=intensity, mode='lines+markers', name='Intensity', line=dict(color='green'), marker=dict(size=0.5)))
 
-# # 标记突变区间
-# for (start, end) in spike_intervals:
-#     fig.add_shape(
-#         type='rect',
-#         x0=time[start], x1=time[end],
-#         y0=min(intensity), y1=max(intensity),
-#         fillcolor='red', opacity=0.3, line_width=0
-#     )
+# 标记突变区间
+for (start, end) in skipe_intervals:
+    # 标记区间
+    fig.add_vrect(x0=start, x1=end, fillcolor='red', opacity=0.3, line_width=0)
 
 # 图形设置
 fig.update_layout(
